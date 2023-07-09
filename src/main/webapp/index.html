@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Encrypted Page</title>
+</head>
+
+<body>
+  <p>
+    <input type="text" id="password" value="(password)">
+    <input type="button" id="decrypt" value="Decrypt">
+    <input type="button" id="show-more" value="...">
+  </p>
+  <p id="more" style="display: none;">
+    <textarea id="plaintext-in" rows="20" cols="80">(plaintext)</textarea><br>
+    <input type="button" id="encrypt" value="Encrypt">
+  </p>
+  <div id="cipherText" style="display: none;">
+    sfT3uDUNV/k62k5rTynjFQ==:tptzXlxDH/twnk/q:FMNQAp7qct4BuSpbokZhdwpdLHKUtHdwMfphCqd83fhpJWA1gks/0aulH+mYKufHKpuxgd4l9KZAnG8=
+  </div>
+  <div id="plaintext"></div>
+  <script src="crypto.js"></script>
+</body>
+
+</html>
