@@ -34,21 +34,41 @@ public class Application {
     }
 
     void run(String[] args) throws IOException, GeneralSecurityException {
-        if (args.length != 3 || !Objects.equals(args[0], "encrypt")) {
+        if (args.length != 2 || !Objects.equals(args[0], "encrypt")) {
             System.out.println("Syntax:");
-            System.out.println("  $ secret-page encrypt <input-file> <output-file>");
+            System.out.println("  $ secret-page encrypt <input.txt>");
             return;
         }
         Path inputFile = Paths.get(args[1]).toAbsolutePath();
-        Path outputFile = Paths.get(args[2]).toAbsolutePath();
+        String baseName = inputFile.getFileName().toString().replaceAll("\\.[a-zA-z0-9]+$", "");
+        Path outputFile = inputFile.getParent().resolve(baseName + ".html");
+        logger.info("Input: {}", inputFile);
+        logger.info("Output: {}", outputFile);
+        logger.info("Name: {}", baseName);
         byte[] plainText = Files.readAllBytes(inputFile);
-        logger.info("Read {} ({} bytes)", inputFile, plainText.length);
-        char[] password = System.console().readPassword("Password: ");
-        String cipherTextParts = encrypt(password, plainText);
-        Files.writeString(outputFile, cipherTextParts, UTF_8, StandardOpenOption.CREATE_NEW);
-        logger.info("Written {} ({} chars)", outputFile, cipherTextParts.length());
+        char[] password = readPassword();
+        String cipherText = encrypt(password, plainText);
+        String outputHtml = fillTemplate(baseName, cipherText);
+        Files.writeString(outputFile, outputHtml, UTF_8, StandardOpenOption.CREATE_NEW);
+        logger.info("Success.");
     }
-    
+
+    private char[] readPassword() {
+        String propertyName = "SECRET_PAGE_PASSWORD";
+        String propertyValue = System.getenv(propertyName);
+        if (propertyValue != null) {
+            logger.info("Using {}", propertyName);
+            return propertyValue.toCharArray();
+        } else {
+            return System.console().readPassword("Password: ");
+        }
+    }
+
+    private String fillTemplate(String name, String cipherText) throws IOException {
+        String template = new String(getClass().getResourceAsStream("/template.html").readAllBytes(), UTF_8);
+        return template.replace("${NAME}", name).replace("${CIPHERTEXT}", cipherText);
+    }
+
     String encrypt(String password, String plainText) throws GeneralSecurityException {
         return encrypt(password.toCharArray(), plainText.getBytes(UTF_8));
     }
@@ -61,7 +81,6 @@ public class Application {
         String cipherTextParts = encoder.encodeToString(salt) + ":" + //
                 encoder.encodeToString(iv) + ":" + //
                 encoder.encodeToString(cipherText);
-        logger.info("cipherText: {}", cipherTextParts);
         return cipherTextParts;
     }
 

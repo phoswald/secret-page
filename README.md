@@ -24,5 +24,6 @@ $ java \
 $ file target/secret-page
 $ ldd  target/secret-page
 
-$ target/secret-page
+$  export SECRET_PAGE_PASSWORD=...
+$ target/secret-page encrypt pom.xml
 ~~~
