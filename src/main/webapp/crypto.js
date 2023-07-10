@@ -30,8 +30,6 @@ function base64StringToBytes(base64Str) {
  * salt is 16 bytes for PBKDF2
  */
 async function createKey(salt, password) {
-    console.log("salt:", salt);
-    console.log("password:", password);
     let keyMaterial = await window.crypto.subtle.importKey(
         "raw",
         stringToBytes(password),
@@ -39,7 +37,6 @@ async function createKey(salt, password) {
         false,
         ["deriveBits", "deriveKey"],
     );
-    console.log("keyMaterial:", keyMaterial);
     let key = await window.crypto.subtle.deriveKey(
         {
             name: "PBKDF2",
@@ -55,7 +52,6 @@ async function createKey(salt, password) {
         true,
         ["encrypt", "decrypt"],
     );
-    console.log("key:", key);
     return key;
 }
 
@@ -65,10 +61,7 @@ async function createKey(salt, password) {
  * iv is 12 bytes for AES-GCM
  */
 async function encryptMessage(key, iv, plainText) {
-    console.log("iv:", iv);
-    console.log("plainText:", plainText);
     let plainTextBytes = stringToBytes(plainText);
-    console.log("plainTextBytes:", plainTextBytes);
     let cipherTextBytes = new Uint8Array(await window.crypto.subtle.encrypt(
         {
             name: "AES-GCM",
@@ -77,9 +70,7 @@ async function encryptMessage(key, iv, plainText) {
         key,
         plainTextBytes
     ));
-    console.log("cipherTextBytes:", cipherTextBytes);
     let cipherText = bytesToBase64String(cipherTextBytes);
-    console.log("cipherText:", cipherText);
     return cipherText;
 }
 
@@ -89,8 +80,6 @@ async function encryptMessage(key, iv, plainText) {
  * iv is 12 bytes for AES-GCM
  */
 async function decryptMessage(key, iv, cipherText) {
-    console.log("iv:", iv);
-    console.log("cipherText:", cipherText);
     let cipherTextBytes = base64StringToBytes(cipherText);
     let plainTextBytes = new Uint8Array(await window.crypto.subtle.decrypt(
         {
@@ -100,9 +89,7 @@ async function decryptMessage(key, iv, cipherText) {
         key,
         cipherTextBytes
     ));
-    console.log("plainTextBytes:", plainTextBytes);
     let plainText = bytesToString(plainTextBytes);
-    console.log("plainText:", plainText);
     return plainText;
 }
 
@@ -120,6 +107,7 @@ document.querySelector("#encrypt").addEventListener("click", async function() {
         let cipherText = await encryptMessage(key, iv, plainText);
         let cipherTextParts = bytesToBase64String(salt) + ":" + bytesToBase64String(iv) + ":" + cipherText;
         document.querySelector("#cipherText").innerHTML = cipherTextParts;
+        console.log("cipherText:", cipherTextParts);
     } catch(e) {
         console.log("exception", e);
         document.querySelector("#cipherText").innerHTML = "ERROR";
