@@ -15,7 +15,7 @@ URL: http://localhost:8080/
 
 ~~~
 $ cd java
-$ mvn clean verify && ./build-native-image.sh
+$ mvn clean verify && ./native-image.sh
 
 $ java \
   -cp $(echo target/secret-page-*-dist/lib)/"*" \
@@ -25,5 +25,9 @@ $ file target/secret-page
 $ ldd  target/secret-page
 
 $  export SECRET_PAGE_PASSWORD=...
-$ target/secret-page encrypt pom.xml
+$ ./target/secret-page encrypt pom.xml
 ~~~
+
+### Known Issues:
+
+- `System.console()` does not work in native images, password must be passed as environment variable!
