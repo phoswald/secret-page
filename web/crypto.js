@@ -106,6 +106,7 @@ document.querySelector("#encrypt").addEventListener("click", async function() {
         let plainText = document.querySelector("#plaintext-in").value;
         let cipherText = await encryptMessage(key, iv, plainText);
         let cipherTextParts = bytesToBase64String(salt) + ":" + bytesToBase64String(iv) + ":" + cipherText;
+        document.querySelector("#password").value = "";
         document.querySelector("#cipherText").innerHTML = cipherTextParts;
         console.log("cipherText:", cipherTextParts);
     } catch(e) {
@@ -123,6 +124,7 @@ document.querySelector("#decrypt").addEventListener("click", async function() {
         let cipherText = cipherTextParts[2];
         let key = await createKey(salt, password);
         let plainText = await decryptMessage(key, iv, cipherText);
+        document.querySelector("#password").value = "";
         document.querySelector("#plaintext-in").value = plainText;
         document.querySelector("#plaintext").innerHTML = plainText;
     } catch(e) {

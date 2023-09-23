@@ -6,7 +6,10 @@ Encrypt and Decrypt web page content using PBKDF2, SHA-256, and AES-GCM
 ## Web Page
 
 ~~~
-$ nginx-start $(pwd)/web/ 8080
+$ docker run -d --rm --name mysecretpage \
+  -p 8080:8080 \
+  -v $(pwd)/web:/usr/share/nginx/html:ro \
+  nginxinc/nginx-unprivileged:alpine
 ~~~
 
 URL: http://localhost:8080/
