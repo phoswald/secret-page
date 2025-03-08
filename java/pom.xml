@@ -66,4 +66,42 @@
     </plugins>
   </build>
 
+  <profiles>
+    <profile>
+      <id>native</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>3.5.0</version>
+            <executions>
+              <execution>
+                <?m2e execute onConfiguration?>
+                <id>exec-native-image</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <configuration>
+                  <executable>native-image</executable>
+                  <arguments>
+                    <argument>--no-fallback</argument>
+                    <argument>--static</argument>
+                    <argument>--libc=musl</argument>
+                    <argument>-H:IncludeResources=^template.html$</argument>
+                    <argument>-cp</argument>
+                    <argument>target/${project.artifactId}-${project.version}-dist/lib/*</argument>
+                    <argument>com.github.phoswald.secret.page.Application</argument>
+                    <argument>target/${project.artifactId}</argument>
+                  </arguments>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
 </project>
