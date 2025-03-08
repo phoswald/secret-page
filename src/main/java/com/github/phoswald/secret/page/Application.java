@@ -64,8 +64,8 @@ public class Application {
         }
     }
 
-    private String fillTemplate(String name, String cipherText) throws IOException {
-        String template = new String(getClass().getResourceAsStream("/template.html").readAllBytes(), UTF_8);
+    String fillTemplate(String name, String cipherText) throws IOException {
+        String template = new String(getClass().getResourceAsStream("/html/template.html").readAllBytes(), UTF_8);
         return template.replace("${NAME}", name).replace("${CIPHERTEXT}", cipherText);
     }
 
@@ -73,7 +73,7 @@ public class Application {
         return encrypt(password.toCharArray(), plainText.getBytes(UTF_8));
     }
 
-    String encrypt(char[] password, byte[] plainText) throws GeneralSecurityException {
+    private String encrypt(char[] password, byte[] plainText) throws GeneralSecurityException {
         byte[] salt = fillRandom(new byte[16]);
         byte[] iv = fillRandom(new byte[12]);
         SecretKey key = createKey(salt, password);

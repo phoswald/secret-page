@@ -1,0 +1,9 @@
+{
+    "resources": [
+        {
+            "glob": "html/**"
+        }, {
+            "glob": "simplelogger.properties"
+        }
+    ]
+}

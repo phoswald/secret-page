@@ -3,21 +3,9 @@
 
 Encrypt and Decrypt web page content using PBKDF2, SHA-256, and AES-GCM
 
-## Web Page
+## Build and Run
 
 ~~~
-$ docker run -d --rm --name mysecretpage \
-  -p 8080:8080 \
-  -v $(pwd):/usr/share/nginx/html:ro \
-  nginxinc/nginx-unprivileged:alpine
-~~~
-
-URL: http://localhost:8080/
-
-## Java Encoder
-
-~~~
-$ cd java
 $ mvn clean verify -P native
 
 $ java \
@@ -28,9 +16,22 @@ $ file target/secret-page
 $ ldd  target/secret-page
 
 $  export SECRET_PAGE_PASSWORD=...
-$ target/secret-page encrypt pom.xml
+$ target/secret-page encrypt test.txt
 ~~~
 
 ### Known Issues:
 
 - `System.console()` does not work in native images, password must be passed as environment variable!
+
+## Web Page
+
+Serve content in your working directory:
+
+~~~
+$ docker run -d --rm --name mysecretpage \
+  -p 8080:8080 \
+  -v $(pwd):/usr/share/nginx/html:ro \
+  nginxinc/nginx-unprivileged:alpine
+~~~
+
+URL: http://localhost:8080/test.html
