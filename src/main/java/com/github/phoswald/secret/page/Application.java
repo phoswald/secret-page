@@ -1,16 +1,19 @@
 package com.github.phoswald.secret.page;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.nio.file.StandardOpenOption.CREATE;
+import static java.nio.file.StandardOpenOption.CREATE_NEW;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
 import java.security.spec.KeySpec;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
+import java.util.List;
 import java.util.Objects;
 
 import javax.crypto.Cipher;
@@ -29,72 +32,93 @@ public class Application {
     private final SecureRandom sr = new SecureRandom();
     private final Base64.Encoder encoder = Base64.getEncoder();
 
+    private String password = null;
+    private boolean allowOverwrite = false;
+
     public static void main(String[] args) throws IOException, GeneralSecurityException {
-        new Application().run(args);
+        new Application().run(Arrays.asList(args));
     }
 
-    void run(String[] args) throws IOException, GeneralSecurityException {
-        if(args.length == 2 && Objects.equals(args[0], "prepare")) {
-            prepare(args);
+    void run(List<String> args) throws IOException, GeneralSecurityException {
+        args = new ArrayList<>(args);
+        for(int i = 0; i < args.size(); i++) {
+            if(args.get(i).equals("--allow-overwrite")) {
+                allowOverwrite(true);
+                args.remove(i); i--;
+            }
+        }
 
-        } else if (args.length == 2  && Objects.equals(args[0], "encrypt")) {
-            encrypt(args);
+        if(args.size() == 2 && Objects.equals(args.get(0), "prepare")) {
+            prepare(Path.of(args.get(1)).toAbsolutePath());
+
+        } else if(args.size() >= 2 && Objects.equals(args.get(0), "encrypt")) {
+            encrypt(args.subList(1, args.size()).stream().map(s -> Path.of(s).toAbsolutePath()).toList());
 
         } else {
-            System.out.println("Syntax:");
-            System.out.println("  $ secret-page prepare <path>");
-            System.out.println("  $ secret-page encrypt <input.txt>");
+            System.out.println("""
+                Syntax: 
+                  secret-page [OPTIONS] prepare PATH
+                  secret-page [OPTIONS] encrypt FILE...
+                Options:
+                  --allow-overwrite       dont fail if target file aready exists
+                Environment:
+                  SECRET_PAGE_PASSWORD    password for encryption, if undefined: prompted from console
+                """);
         }
     }
 
-    void prepare(String[] args) throws IOException {
-        Path outputFile = Paths.get(args[1], "crypto.js").toAbsolutePath();
+    Application password(String value) {
+        password = value;
+        return this;
+    }
+
+    Application allowOverwrite(boolean value) {
+        allowOverwrite = value;
+        return this;
+    }
+
+    void prepare(Path outputDir) throws IOException {
+        Path outputFile = outputDir.resolve("crypto.js");
         String outputJs = new String(getClass().getResourceAsStream("/html/crypto.js").readAllBytes(), UTF_8);
-        logger.info("Writing: {}", outputFile);
-        Files.writeString(outputFile, outputJs, UTF_8, StandardOpenOption.CREATE);
-        logger.info("Success.");
+        logger.info("Writing: {} (size: {})", outputFile, outputJs.length());
+        Files.createDirectories(outputFile.getParent());
+        Files.writeString(outputFile, outputJs, UTF_8, allowOverwrite ? CREATE : CREATE_NEW);
     }
 
-    void encrypt(String[] args) throws IOException, GeneralSecurityException {
-        Path inputFile = Paths.get(args[1]).toAbsolutePath();
-        String baseName = inputFile.getFileName().toString().replaceAll("\\.[a-zA-z0-9]+$", "");
-        Path outputFile = inputFile.getParent().resolve(baseName + ".html");
-        logger.info("Input: {}", inputFile);
-        logger.info("Output: {}", outputFile);
-        logger.info("Name: {}", baseName);
-        byte[] plainText = Files.readAllBytes(inputFile);
-        char[] password = readPassword();
-        String cipherText = encrypt(password, plainText);
-        String outputHtml = fillTemplate(baseName, cipherText);
-        Files.writeString(outputFile, outputHtml, UTF_8, StandardOpenOption.CREATE_NEW);
-        logger.info("Success.");
+    void encrypt(List<Path> inputFiles) throws IOException, GeneralSecurityException {
+        String password = readPassword();
+        for(Path inputFile : inputFiles) {
+            String fileName = inputFile.getFileName().toString();
+            String baseName = fileName.replaceAll("\\.[a-zA-z0-9]+$", "");
+            Path outputFile = inputFile.getParent().resolve(fileName + ".html");
+            logger.info("Reading: {}", inputFile);
+            String plainText = Files.readString(inputFile, UTF_8);
+            String cipherText = encryptString(password, plainText);
+            String outputHtml = fillTemplate(baseName, cipherText);
+            logger.info("Writing: {} ('{}', size: {})", outputFile, baseName, outputHtml.length());
+            Files.writeString(outputFile, outputHtml, UTF_8, allowOverwrite ? CREATE : CREATE_NEW);
+        }
     }
 
-    private char[] readPassword() {
+    private String readPassword() {
+        if(password != null && !password.isEmpty()) {
+            return password;
+        }
         String propertyName = "SECRET_PAGE_PASSWORD";
         String propertyValue = System.getenv(propertyName);
-        if (propertyValue != null) {
-            logger.info("Using {}", propertyName);
-            return propertyValue.toCharArray();
+        if (propertyValue != null && !propertyValue.isEmpty()) {
+            logger.info("Reading password from {}", propertyName);
+            return propertyValue;
         } else {
-            return System.console().readPassword("Password: ");
+            return new String(System.console().readPassword("Password: "));
         }
     }
 
-    String fillTemplate(String name, String cipherText) throws IOException {
-        String template = new String(getClass().getResourceAsStream("/html/template.html").readAllBytes(), UTF_8);
-        return template.replace("${NAME}", name).replace("${CIPHERTEXT}", cipherText);
-    }
-
-    String encrypt(String password, String plainText) throws GeneralSecurityException {
-        return encrypt(password.toCharArray(), plainText.getBytes(UTF_8));
-    }
-
-    private String encrypt(char[] password, byte[] plainText) throws GeneralSecurityException {
+    String encryptString(String password, String plainText) throws GeneralSecurityException {
         byte[] salt = fillRandom(new byte[16]);
         byte[] iv = fillRandom(new byte[12]);
-        SecretKey key = createKey(salt, password);
-        byte[] cipherText = encryptMessage(key, iv, plainText);
+        SecretKey key = createKey(salt, password.toCharArray());
+        byte[] cipherText = encryptMessage(key, iv, plainText.getBytes(UTF_8));
         String cipherTextParts = encoder.encodeToString(salt) + ":" + //
                 encoder.encodeToString(iv) + ":" + //
                 encoder.encodeToString(cipherText);
@@ -119,5 +143,10 @@ public class Application {
     private byte[] fillRandom(byte[] buffer) {
         sr.nextBytes(buffer);
         return buffer;
+    }
+
+    String fillTemplate(String name, String cipherText) throws IOException {
+        String template = new String(getClass().getResourceAsStream("/html/template.html").readAllBytes(), UTF_8);
+        return template.replace("${NAME}", name).replace("${CIPHERTEXT}", cipherText);
     }
 }

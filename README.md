@@ -18,7 +18,7 @@ $ ldd  target/secret-page
 $ export SECRET_PAGE_PASSWORD=1234
 $ echo "Hello, World!" > data/test.txt
 $ target/secret-page prepare data/
-$ target/secret-page encrypt data/test.txt
+$ target/secret-page encrypt data/test.txt --allow-overwrite
 ~~~
 
 ### Known Issues:
