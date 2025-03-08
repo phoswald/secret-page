@@ -15,8 +15,10 @@ $ java \
 $ file target/secret-page
 $ ldd  target/secret-page
 
-$  export SECRET_PAGE_PASSWORD=...
-$ target/secret-page encrypt test.txt
+$ export SECRET_PAGE_PASSWORD=1234
+$ echo "Hello, World!" > data/test.txt
+$ target/secret-page prepare data/
+$ target/secret-page encrypt data/test.txt
 ~~~
 
 ### Known Issues:
@@ -25,12 +27,12 @@ $ target/secret-page encrypt test.txt
 
 ## Web Page
 
-Serve content in your working directory:
+Serve content in working directory:
 
 ~~~
 $ docker run -d --rm --name mysecretpage \
   -p 8080:8080 \
-  -v $(pwd):/usr/share/nginx/html:ro \
+  -v $(pwd)/data:/usr/share/nginx/html:ro \
   nginxinc/nginx-unprivileged:alpine
 ~~~
 

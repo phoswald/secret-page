@@ -93,17 +93,13 @@ async function decryptMessage(key, iv, cipherText) {
     return plainText;
 }
 
-document.querySelector("#show-more").addEventListener("click", function() { 
-    document.querySelector("#more").style.display = "block";
-});
-
 document.querySelector("#encrypt").addEventListener("click", async function() {
     try {
         let password = document.querySelector("#password").value;
         let salt = window.crypto.getRandomValues(new Uint8Array(16));
         let iv = window.crypto.getRandomValues(new Uint8Array(12));
         let key = await createKey(salt, password);
-        let plainText = document.querySelector("#plaintext-in").value;
+        let plainText = document.querySelector("#plaintext-input").value;
         let cipherText = await encryptMessage(key, iv, plainText);
         let cipherTextParts = bytesToBase64String(salt) + ":" + bytesToBase64String(iv) + ":" + cipherText;
         document.querySelector("#password").value = "";
@@ -111,6 +107,7 @@ document.querySelector("#encrypt").addEventListener("click", async function() {
         console.log("cipherText:", cipherTextParts);
     } catch(e) {
         console.log("exception", e);
+        document.querySelector("#password").value = "";
         document.querySelector("#cipherText").innerHTML = "ERROR";
     }
 });
@@ -125,10 +122,11 @@ document.querySelector("#decrypt").addEventListener("click", async function() {
         let key = await createKey(salt, password);
         let plainText = await decryptMessage(key, iv, cipherText);
         document.querySelector("#password").value = "";
-        document.querySelector("#plaintext-in").value = plainText;
         document.querySelector("#plaintext").innerHTML = plainText;
+        document.querySelector("#menu").remove();
     } catch(e) {
         console.log("exception", e);
+        document.querySelector("#password").value = "";
         document.querySelector("#plaintext").innerHTML = "ERROR";
     }
 });

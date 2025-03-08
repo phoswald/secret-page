@@ -13,6 +13,11 @@ import org.junit.jupiter.api.Test;
 class ApplicationTest {
     
     private final Application testee = new Application();
+
+    @Test
+    void prepare_valid_success() throws IOException {
+        testee.prepare(new String[] { "prepare", "data" });
+    }
     
     @Test
     void encrypt_valid_success() throws GeneralSecurityException {

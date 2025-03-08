@@ -34,11 +34,28 @@ public class Application {
     }
 
     void run(String[] args) throws IOException, GeneralSecurityException {
-        if (args.length != 2 || !Objects.equals(args[0], "encrypt")) {
+        if(args.length == 2 && Objects.equals(args[0], "prepare")) {
+            prepare(args);
+
+        } else if (args.length == 2  && Objects.equals(args[0], "encrypt")) {
+            encrypt(args);
+
+        } else {
             System.out.println("Syntax:");
+            System.out.println("  $ secret-page prepare <path>");
             System.out.println("  $ secret-page encrypt <input.txt>");
-            return;
         }
+    }
+
+    void prepare(String[] args) throws IOException {
+        Path outputFile = Paths.get(args[1], "crypto.js").toAbsolutePath();
+        String outputJs = new String(getClass().getResourceAsStream("/html/crypto.js").readAllBytes(), UTF_8);
+        logger.info("Writing: {}", outputFile);
+        Files.writeString(outputFile, outputJs, UTF_8, StandardOpenOption.CREATE);
+        logger.info("Success.");
+    }
+
+    void encrypt(String[] args) throws IOException, GeneralSecurityException {
         Path inputFile = Paths.get(args[1]).toAbsolutePath();
         String baseName = inputFile.getFileName().toString().replaceAll("\\.[a-zA-z0-9]+$", "");
         Path outputFile = inputFile.getParent().resolve(baseName + ".html");
