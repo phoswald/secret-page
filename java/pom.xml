@@ -10,8 +10,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.release>21</maven.compiler.release>
-    <rstm.version>0.1.0-SNAPSHOT</rstm.version>
+    <maven.compiler.release>23</maven.compiler.release>
   </properties>
 
   <dependencies>
