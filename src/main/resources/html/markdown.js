@@ -13,10 +13,18 @@ class MarkdownTextElement extends HTMLElement {
                 .then(response => response.text())
                 .then(text => this._renderMarkdown(text))
                 .catch(err => console.error('Failed to load:', err));
-        } else {
-            const text = this.querySelector('script[type="text/markdown"]')?.textContent ?? '';
-            this._renderMarkdown(this._dedent(text));
+            return;
         }
+        const script = this.querySelector('script[type="text/markdown"]');
+        if (script) {
+            this._renderMarkdown(this._dedent(script.textContent));
+        }
+    }
+
+    // Render markdown supplied programmatically as a plain string.
+    // The text is never serialized to HTML, so it cannot break out of any markup.
+    set markdown(value) {
+        this._renderMarkdown(value);
     }
 
     // Strip the minimum indentation found across all non-empty lines 

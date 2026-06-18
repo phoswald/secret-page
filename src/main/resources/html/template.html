@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data: https:; connect-src 'self'; base-uri 'none'; form-action 'none'">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>${NAME}</title>
   <link rel="icon" href="secret-page/secret.ico">
@@ -14,12 +16,12 @@
     <input type="password" id="password" placeholder="Password">
     <input type="button" id="decrypt" value="Decrypt"><br>
     <!-- enable if desired -->
-    <span style="display: none;">
+    <span class="hidden">
       <textarea id="plaintext-input" rows="20" cols="80" placeholder="Plaintext"></textarea><br>
       <input type="button" id="encrypt" value="Encrypt">
     </span>
   </p>
-  <div id="cipherText" style="display: none;">
+  <div id="cipherText" class="hidden">
     ${CIPHERTEXT}
   </div>
   <div id="plaintext"></div>

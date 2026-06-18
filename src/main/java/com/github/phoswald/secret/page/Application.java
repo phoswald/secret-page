@@ -139,7 +139,7 @@ public class Application {
 
     private SecretKey createKey(byte[] salt, char[] password) throws GeneralSecurityException {
         SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
-        KeySpec keySpec = new PBEKeySpec(password, salt, 100000 /* iterationCount */, 256 /* keyLength */);
+        KeySpec keySpec = new PBEKeySpec(password, salt, 600000 /* iterationCount */, 256 /* keyLength */);
         SecretKey key1 = factory.generateSecret(keySpec);
         SecretKey key2 = new SecretKeySpec(key1.getEncoded(), "AES");
         return key2;
