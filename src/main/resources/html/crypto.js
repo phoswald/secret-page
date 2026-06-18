@@ -41,7 +41,7 @@ async function createKey(salt, password) {
         {
             name: "PBKDF2",
             salt,
-            iterations: 100000,
+            iterations: 600000,
             hash: "SHA-256",
         },
         keyMaterial,
@@ -93,10 +93,6 @@ async function decryptMessage(key, iv, cipherText) {
     return plainText;
 }
 
-function createMarkdownHtml(text) {
-    return "<markdown-text><script type='text/markdown'>\n" + text + "\n</script></markdown-text>";
-}
-
 document.querySelector("#encrypt").addEventListener("click", async function() {
     try {
         let password = document.querySelector("#password").value;
@@ -126,7 +122,9 @@ document.querySelector("#decrypt").addEventListener("click", async function() {
         let key = await createKey(salt, password);
         let plainText = await decryptMessage(key, iv, cipherText);
         document.querySelector("#password").value = "";
-        document.querySelector("#plaintext").innerHTML = createMarkdownHtml(plainText);
+        let markdownElement = document.createElement("markdown-text");
+        document.querySelector("#plaintext").replaceChildren(markdownElement);
+        markdownElement.markdown = plainText;
         document.querySelector("#menu").remove();
     } catch(e) {
         console.log("exception", e);
