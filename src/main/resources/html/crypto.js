@@ -93,6 +93,10 @@ async function decryptMessage(key, iv, cipherText) {
     return plainText;
 }
 
+function createMarkdownHtml(text) {
+    return "<markdown-text><script type='text/markdown'>\n" + text + "\n</script></markdown-text>";
+}
+
 document.querySelector("#encrypt").addEventListener("click", async function() {
     try {
         let password = document.querySelector("#password").value;
@@ -122,7 +126,7 @@ document.querySelector("#decrypt").addEventListener("click", async function() {
         let key = await createKey(salt, password);
         let plainText = await decryptMessage(key, iv, cipherText);
         document.querySelector("#password").value = "";
-        document.querySelector("#plaintext").innerHTML = plainText;
+        document.querySelector("#plaintext").innerHTML = createMarkdownHtml(plainText);
         document.querySelector("#menu").remove();
     } catch(e) {
         console.log("exception", e);

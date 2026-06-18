@@ -1,0 +1,47 @@
+
+import { marked } from './marked.js';
+import dompurify from './dompurify.js';
+
+// import { marked } from 'https://cdn.jsdelivr.net/npm/marked@16/+esm';
+// import dompurify from 'https://cdn.jsdelivr.net/npm/dompurify@3/+esm';
+
+class MarkdownTextElement extends HTMLElement {
+    connectedCallback() {
+        const src = this.getAttribute('src');
+        if (src) {
+            fetch(src)
+                .then(response => response.text())
+                .then(text => this._renderMarkdown(text))
+                .catch(err => console.error('Failed to load:', err));
+        } else {
+            const text = this.querySelector('script[type="text/markdown"]')?.textContent ?? '';
+            this._renderMarkdown(this._dedent(text));
+        }
+    }
+
+    // Strip the minimum indentation found across all non-empty lines 
+    _dedent(text) {
+        const lines = text.split('\n');
+        const minIndent = lines
+            .filter(line => line.trim().length > 0)
+            .reduce((min, line) => Math.min(min, line.match(/^ */)[0].length), Infinity);
+        return lines
+            .map(line => line.slice(minIndent))
+            .join('\n')
+            .trim();        
+    }
+
+    _renderMarkdown(text) {
+        console.log('Got markdown: ', text.length, ' characters');
+        this.innerHTML = dompurify.sanitize(marked.parse(text));
+    }
+}
+
+customElements.define('markdown-text', MarkdownTextElement);
+
+// Not needed for modules:
+// document.addEventListener('DOMContentLoaded', () => {
+//     // Define the custom element after the DOM is fully loaded.
+//     // Otherwise, connectedCallback() is called before child nodes are available.
+//     customElements.define('markdown-text', MarkdownTextElement);
+// });

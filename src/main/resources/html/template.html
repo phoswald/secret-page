@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>${NAME}</title>
+  <link rel="icon" href="secret-page/secret.ico">
+  <link rel="stylesheet" href="secret-page/defaults.css">
+  <link rel="stylesheet" href="secret-page/markdown.css">
+  <script src="secret-page/markdown.js" type="module"></script>
 </head>
-
 <body>
   <p id="menu">
     <input type="password" id="password" placeholder="Password">
@@ -20,8 +22,7 @@
   <div id="cipherText" style="display: none;">
     ${CIPHERTEXT}
   </div>
-  <pre id="plaintext"></pre>
-  <script src="crypto.js"></script>
+  <div id="plaintext"></div>
+  <script src="secret-page/crypto.js"></script>
 </body>
-
 </html>

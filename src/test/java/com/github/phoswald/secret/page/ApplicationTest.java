@@ -5,6 +5,7 @@ import static java.nio.file.StandardOpenOption.CREATE;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.emptyOrNullString;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -33,7 +34,13 @@ class ApplicationTest {
         testee.prepare(Path.of("target/test-data/"));
 
         // Assert
-        assertThat(Files.readString(Path.of("target/test-data/crypto.js"), UTF_8), not(emptyOrNullString()));
+        assertThat(Files.readAllBytes(Path.of("target/test-data/secret-page/secret.ico")).length, equalTo(17014));
+        assertThat(Files.readString(Path.of("target/test-data/secret-page/defaults.css"), UTF_8), not(emptyOrNullString()));
+        assertThat(Files.readString(Path.of("target/test-data/secret-page/markdown.css"), UTF_8), not(emptyOrNullString()));
+        assertThat(Files.readString(Path.of("target/test-data/secret-page/markdown.js"), UTF_8), not(emptyOrNullString()));
+        assertThat(Files.readString(Path.of("target/test-data/secret-page/dompurify.js"), UTF_8), not(emptyOrNullString()));
+        assertThat(Files.readString(Path.of("target/test-data/secret-page/marked.js"), UTF_8), not(emptyOrNullString()));
+        assertThat(Files.readString(Path.of("target/test-data/secret-page/crypto.js"), UTF_8), not(emptyOrNullString()));
     }
 
     @Test

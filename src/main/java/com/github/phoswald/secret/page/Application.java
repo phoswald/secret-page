@@ -3,6 +3,7 @@ package com.github.phoswald.secret.page;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.StandardOpenOption.CREATE;
 import static java.nio.file.StandardOpenOption.CREATE_NEW;
+import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -58,7 +59,7 @@ public class Application {
             System.out.println("""
                 Syntax: 
                   secret-page [OPTIONS] prepare PATH
-                  secret-page [OPTIONS] encrypt FILE...
+                  secret-page [OPTIONS] encrypt MD-FILE...
                 Options:
                   --allow-overwrite       dont fail if target file aready exists
                 Environment:
@@ -78,11 +79,22 @@ public class Application {
     }
 
     void prepare(Path outputDir) throws IOException {
-        Path outputFile = outputDir.resolve("crypto.js");
-        String outputJs = new String(getClass().getResourceAsStream("/html/crypto.js").readAllBytes(), UTF_8);
-        logger.info("Writing: {} (size: {})", outputFile, outputJs.length());
+        outputDir = outputDir.resolve("secret-page");
+        prepareFile(outputDir, "secret.ico");
+        prepareFile(outputDir, "defaults.css");
+        prepareFile(outputDir, "markdown.css");
+        prepareFile(outputDir, "markdown.js");
+        prepareFile(outputDir, "dompurify.js");
+        prepareFile(outputDir, "marked.js");
+        prepareFile(outputDir, "crypto.js");
+    }
+
+    private void prepareFile(Path outputDir, String fileName) throws IOException {
+        Path outputFile = outputDir.resolve(fileName);
+        byte[] outputContent = getClass().getResourceAsStream("/html/" + fileName).readAllBytes();
+        logger.info("Writing: {} (size: {})", outputFile, outputContent.length);
         Files.createDirectories(outputFile.getParent());
-        Files.writeString(outputFile, outputJs, UTF_8, allowOverwrite ? CREATE : CREATE_NEW);
+        Files.write(outputFile, outputContent, allowOverwrite ? CREATE : CREATE_NEW, TRUNCATE_EXISTING);
     }
 
     void encrypt(List<Path> inputFiles) throws IOException, GeneralSecurityException {
@@ -96,7 +108,7 @@ public class Application {
             String cipherText = encryptString(password, plainText);
             String outputHtml = fillTemplate(baseName, cipherText);
             logger.info("Writing: {} ('{}', size: {})", outputFile, baseName, outputHtml.length());
-            Files.writeString(outputFile, outputHtml, UTF_8, allowOverwrite ? CREATE : CREATE_NEW);
+            Files.writeString(outputFile, outputHtml, UTF_8, allowOverwrite ? CREATE : CREATE_NEW, TRUNCATE_EXISTING);
         }
     }
 
