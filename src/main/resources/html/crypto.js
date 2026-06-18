@@ -122,9 +122,7 @@ document.querySelector("#decrypt").addEventListener("click", async function() {
         let key = await createKey(salt, password);
         let plainText = await decryptMessage(key, iv, cipherText);
         document.querySelector("#password").value = "";
-        let markdownElement = document.createElement("markdown-text");
-        document.querySelector("#plaintext").replaceChildren(markdownElement);
-        markdownElement.markdown = plainText;
+        document.querySelector("#plaintext").markdown = plainText;
         document.querySelector("#menu").remove();
     } catch(e) {
         console.log("exception", e);
