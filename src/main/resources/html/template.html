@@ -3,14 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="Content-Security-Policy"
-        content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data: https:; connect-src 'self'; base-uri 'none'; form-action 'none'">
+        content="default-src 'none'; script-src 'self' file:; style-src 'self' file:; img-src 'self' file: data: https:; connect-src 'self'; base-uri 'none'; form-action 'none'">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>${NAME}</title>
   <link rel="icon" href="secret-page/secret.ico">
   <link rel="stylesheet" href="secret-page/defaults.css">
   <link rel="stylesheet" href="secret-page/markdown.css">
-  <script src="secret-page/markdown.js" type="module"></script>
-  <script src="secret-page/crypto.js" type="module"></script>
+  <script src="secret-page/dompurify.js" defer></script>
+  <script src="secret-page/marked.js" defer></script>
+  <script src="secret-page/markdown.js" defer></script>
+  <script src="secret-page/crypto.js" defer></script>
 </head>
 <body>
   <p id="menu">

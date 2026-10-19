@@ -1,9 +1,6 @@
 
-import { marked } from './marked.js';
-import dompurify from './dompurify.js';
-
-// import { marked } from 'https://cdn.jsdelivr.net/npm/marked@16/+esm';
-// import dompurify from 'https://cdn.jsdelivr.net/npm/dompurify@3/+esm';
+// Requires the globals `marked` and `DOMPurify` (UMD builds loaded via marked.js and dompurify.js).
+// Classic scripts (not ES modules) are used so the page also works when opened from file:// URLs.
 
 class MarkdownTextElement extends HTMLElement {
     connectedCallback() {
@@ -41,13 +38,13 @@ class MarkdownTextElement extends HTMLElement {
 
     _renderMarkdown(text) {
         console.log('Got markdown: ', text.length, ' characters');
-        this.innerHTML = dompurify.sanitize(marked.parse(text));
+        this.innerHTML = DOMPurify.sanitize(marked.parse(text));
     }
 }
 
 customElements.define('markdown-text', MarkdownTextElement);
 
-// Not needed for modules:
+// Not needed for deferred scripts:
 // document.addEventListener('DOMContentLoaded', () => {
 //     // Define the custom element after the DOM is fully loaded.
 //     // Otherwise, connectedCallback() is called before child nodes are available.
