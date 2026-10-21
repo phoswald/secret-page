@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test;
 class ApplicationTest {
 
     private static final String PASSWORD = "1234";
-    private static final String CIPHER_TEXT = "4auseYysZKy1jZWkE42vmg==:ciZuYJsFlTZVpYPA:9DqdGP9rVdwmXuM3urW9j0GhsQIe85zcGgQsy9fuGpcKIU/V7PdAFrtnPB4B/qr9Z9wEQ4DYYMQepzsfFbLyF5t/EVM=";
+    private static final String CIPHER_TEXT = "4auseYysZKy1jZWkE42vmg:ciZuYJsFlTZVpYPA:9DqdGP9rVdwmXuM3urW9j0GhsQIe85zcGgQsy9fuGpcKIU/V7PdAFrtnPB4B/qr9Z9wEQ4DYYMQepzsfFbLyF5t/EVM";
     private static final String PLAIN_TEXT = """
         This is a sample text
         consisting of multiple lines.
@@ -103,9 +103,9 @@ class ApplicationTest {
         // Assert
         String[] cipherTextParts = cipherText.split(":");
         assertEquals(3, cipherTextParts.length);
-        assertEquals(18, cipherTextParts[0].length() * 3 / 4);
-        assertEquals(12, cipherTextParts[1].length() * 3 / 4);
-        assertEquals(69, cipherTextParts[2].length() * 3 / 4);
+        assertEquals(16 /* salt bytes */, cipherTextParts[0].length() * 3 / 4);
+        assertEquals(12 /* iv bytes */, cipherTextParts[1].length() * 3 / 4);
+        assertEquals(PLAIN_TEXT.length() + 16 /* checksum bytes */, cipherTextParts[2].length() * 3 / 4);
     }
 
     @Test

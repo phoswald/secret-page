@@ -12,7 +12,7 @@ function bytesToBase64String(ary) {
     for (let i = 0; i < ary.length; i++) {
         str += String.fromCharCode(ary[i]);
     }
-    return btoa(str);
+    return btoa(str).replace(/=+$/, "");
 }
 
 function base64StringToBytes(base64Str) {

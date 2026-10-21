@@ -31,7 +31,7 @@ public class Application {
 
     private static final Logger logger = LoggerFactory.getLogger(Application.class);
     private final SecureRandom sr = new SecureRandom();
-    private final Base64.Encoder encoder = Base64.getEncoder();
+    private final Base64.Encoder encoder = Base64.getEncoder().withoutPadding();
     private final Base64.Decoder decoder = Base64.getDecoder();
 
     private String password = null;
