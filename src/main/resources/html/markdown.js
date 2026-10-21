@@ -1,6 +1,11 @@
 
-// Requires the globals `marked` and `DOMPurify` (UMD builds loaded via marked.js and dompurify.js).
-// Classic scripts (not ES modules) are used so the page also works when opened from file:// URLs.
+// import { marked } from 'https://cdn.jsdelivr.net/npm/marked@18.1.1/+esm';
+// import DOMPurify  from 'https://cdn.jsdelivr.net/npm/dompurify@3.4.17/+esm';
+
+// curl 'https://cdn.jsdelivr.net/npm/marked@18.1.1/+esm'    -s -o marked.esm.js 
+// curl 'https://cdn.jsdelivr.net/npm/dompurify@3.4.17/+esm' -s -o dompurify.esm.js 
+// import { marked } from './marked.esm.js';
+// import DOMPurify  from './dompurify.esm.js';
 
 class MarkdownTextElement extends HTMLElement {
     connectedCallback() {
@@ -24,7 +29,7 @@ class MarkdownTextElement extends HTMLElement {
         this._renderMarkdown(value);
     }
 
-    // Strip the minimum indentation found across all non-empty lines 
+    // Strip the minimum indentation found across all non-empty lines
     _dedent(text) {
         const lines = text.split('\n');
         const minIndent = lines
@@ -33,7 +38,7 @@ class MarkdownTextElement extends HTMLElement {
         return lines
             .map(line => line.slice(minIndent))
             .join('\n')
-            .trim();        
+            .trim();
     }
 
     _renderMarkdown(text) {
@@ -44,7 +49,7 @@ class MarkdownTextElement extends HTMLElement {
 
 customElements.define('markdown-text', MarkdownTextElement);
 
-// Not needed for deferred scripts:
+// Not needed for modules or deferred scripts:
 // document.addEventListener('DOMContentLoaded', () => {
 //     // Define the custom element after the DOM is fully loaded.
 //     // Otherwise, connectedCallback() is called before child nodes are available.

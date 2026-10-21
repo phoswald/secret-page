@@ -83,9 +83,9 @@ public class Application {
         prepareFile(outputDir, "secret.ico");
         prepareFile(outputDir, "defaults.css");
         prepareFile(outputDir, "markdown.css");
+        prepareFile(outputDir, "dompurify.umd.min.js");
+        prepareFile(outputDir, "marked.umd.min.js");
         prepareFile(outputDir, "markdown.js");
-        prepareFile(outputDir, "dompurify.js");
-        prepareFile(outputDir, "marked.js");
         prepareFile(outputDir, "crypto.js");
     }
 

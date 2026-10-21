@@ -37,9 +37,9 @@ class ApplicationTest {
         assertThat(Files.readAllBytes(Path.of("target/test-data/secret-page/secret.ico")).length, equalTo(17014));
         assertThat(Files.readString(Path.of("target/test-data/secret-page/defaults.css"), UTF_8), not(emptyOrNullString()));
         assertThat(Files.readString(Path.of("target/test-data/secret-page/markdown.css"), UTF_8), not(emptyOrNullString()));
+        assertThat(Files.readString(Path.of("target/test-data/secret-page/dompurify.umd.min.js"), UTF_8), not(emptyOrNullString()));
+        assertThat(Files.readString(Path.of("target/test-data/secret-page/marked.umd.min.js"), UTF_8), not(emptyOrNullString()));
         assertThat(Files.readString(Path.of("target/test-data/secret-page/markdown.js"), UTF_8), not(emptyOrNullString()));
-        assertThat(Files.readString(Path.of("target/test-data/secret-page/dompurify.js"), UTF_8), not(emptyOrNullString()));
-        assertThat(Files.readString(Path.of("target/test-data/secret-page/marked.js"), UTF_8), not(emptyOrNullString()));
         assertThat(Files.readString(Path.of("target/test-data/secret-page/crypto.js"), UTF_8), not(emptyOrNullString()));
     }
 
