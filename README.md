@@ -18,7 +18,8 @@ $ ldd  target/secret-page
 $ export SECRET_PAGE_PASSWORD=1234
 $ echo "Hello, World!" > data/test.md
 $ target/secret-page prepare data/
-$ target/secret-page encrypt data/test.md --allow-overwrite
+$ target/secret-page encrypt data/test.md   --allow-overwrite
+$ target/secret-page decrypt data/test.html --allow-overwrite
 ~~~
 
 ### Known Issues:
@@ -38,5 +39,5 @@ $ docker run -d --rm --name mysecretpage \
 
 Links:
 
-- [test.md.html](./data/test.md.html)
-- http://localhost:8080/test.md.html
+- [test.html](./data/test.html)
+- http://localhost:8080/test.html

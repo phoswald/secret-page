@@ -9,6 +9,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -47,7 +48,7 @@ class ApplicationTest {
     @Test
     void encrypt_valid_success() throws IOException, GeneralSecurityException {
         // Arrange
-        Path input = Path.of("target/test-data/sample.txt");
+        Path input = Path.of("target/test-data/encrypt.md");
         Files.createDirectories(input.getParent());
         Files.writeString(input, PLAIN_TEXT, UTF_8, CREATE);
 
@@ -55,13 +56,24 @@ class ApplicationTest {
         testee.encrypt(List.of(input));
 
         // Assert
-        assertThat(Files.readString(Path.of("target/test-data/sample.txt.html"), UTF_8), not(emptyOrNullString()));
+        assertThat(Files.readString(Path.of("target/test-data/encrypt.html"), UTF_8), not(emptyOrNullString()));
+    }
+
+    @Test
+    void encrypt_notMd_failure() throws IOException {
+        // Arrange
+        Path input = Path.of("target/test-data/encrypt.txt");
+        Files.createDirectories(input.getParent());
+        Files.writeString(input, PLAIN_TEXT, UTF_8, CREATE);
+
+        // Act & Assert
+        assertThrows(IllegalArgumentException.class, () -> testee.encrypt(List.of(input)));
     }
 
     @Test
     void decrypt_valid_success() throws IOException, GeneralSecurityException {
         // Arrange
-        Path input = Path.of("target/test-data/decrypt.txt.html");
+        Path input = Path.of("target/test-data/decrypt.html");
         Files.createDirectories(input.getParent());
         Files.writeString(input, testee.fillTemplate("decrypt", CIPHER_TEXT), UTF_8, CREATE);
 
@@ -69,7 +81,18 @@ class ApplicationTest {
         testee.decrypt(List.of(input));
 
         // Assert
-        assertEquals(PLAIN_TEXT, Files.readString(Path.of("target/test-data/decrypt.txt"), UTF_8));
+        assertEquals(PLAIN_TEXT, Files.readString(Path.of("target/test-data/decrypt.md"), UTF_8));
+    }
+
+    @Test
+    void decrypt_notHtml_failure() throws IOException {
+        // Arrange
+        Path input = Path.of("target/test-data/decrypt.txt");
+        Files.createDirectories(input.getParent());
+        Files.writeString(input, testee.fillTemplate("decrypt", CIPHER_TEXT), UTF_8, CREATE);
+
+        // Act & Assert
+        assertThrows(IllegalArgumentException.class, () -> testee.decrypt(List.of(input)));
     }
 
     @Test

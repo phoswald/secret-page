@@ -106,13 +106,16 @@ public class Application {
         String password = readPassword();
         for(Path inputFile : inputFiles) {
             String fileName = inputFile.getFileName().toString();
-            String baseName = fileName.replaceAll("\\.[a-zA-z0-9]+$", "");
-            Path outputFile = inputFile.getParent().resolve(fileName + ".html");
+            if(!fileName.endsWith(".md")) {
+                throw new IllegalArgumentException("Encryption requires *.md files");
+            }
+            String baseName = fileName.replaceAll("\\.md$", "");
+            Path outputFile = inputFile.getParent().resolve(baseName + ".html");
             logger.info("Reading: {}", inputFile);
             String plainText = Files.readString(inputFile, UTF_8);
             String cipherText = encryptString(password, plainText);
             String outputHtml = fillTemplate(baseName, cipherText);
-            logger.info("Writing: {} ('{}', size: {})", outputFile, baseName, outputHtml.length());
+            logger.info("Writing: {} (size: {})", outputFile, outputHtml.length());
             Files.writeString(outputFile, outputHtml, UTF_8, allowOverwrite ? CREATE : CREATE_NEW, TRUNCATE_EXISTING);
         }
     }
@@ -122,9 +125,9 @@ public class Application {
         for(Path inputFile : inputFiles) {
             String fileName = inputFile.getFileName().toString();
             if(!fileName.endsWith(".html")) {
-                throw new IOException("Not an .html file: " + inputFile);
+                throw new IllegalArgumentException("Decryption requires *.html files");
             }
-            Path outputFile = inputFile.getParent().resolve(fileName.replaceAll("\\.html$", ""));
+            Path outputFile = inputFile.getParent().resolve(fileName.replaceAll("\\.html$", "") + ".md");
             logger.info("Reading: {}", inputFile);
             String inputHtml = Files.readString(inputFile, UTF_8);
             String cipherText = extractCipherText(inputHtml);
