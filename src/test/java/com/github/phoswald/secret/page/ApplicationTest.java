@@ -20,13 +20,14 @@ import org.junit.jupiter.api.Test;
 
 class ApplicationTest {
 
-    private final String password = "1234";
-    private final String plainText = """
+    private static final String PASSWORD = "1234";
+    private static final String CIPHER_TEXT = "4auseYysZKy1jZWkE42vmg==:ciZuYJsFlTZVpYPA:9DqdGP9rVdwmXuM3urW9j0GhsQIe85zcGgQsy9fuGpcKIU/V7PdAFrtnPB4B/qr9Z9wEQ4DYYMQepzsfFbLyF5t/EVM=";
+    private static final String PLAIN_TEXT = """
         This is a sample text
         consisting of multiple lines.
         """;
     
-    private final Application testee = new Application().password(password).allowOverwrite(true);
+    private final Application testee = new Application().password(PASSWORD).allowOverwrite(true);
 
     @Test
     void prepare_valid_success() throws IOException {
@@ -48,7 +49,7 @@ class ApplicationTest {
         // Arrange
         Path input = Path.of("target/test-data/sample.txt");
         Files.createDirectories(input.getParent());
-        Files.writeString(input, plainText, UTF_8, CREATE);
+        Files.writeString(input, PLAIN_TEXT, UTF_8, CREATE);
 
         // Act
         testee.encrypt(List.of(input));
@@ -58,16 +59,39 @@ class ApplicationTest {
     }
 
     @Test
+    void decrypt_valid_success() throws IOException, GeneralSecurityException {
+        // Arrange
+        Path input = Path.of("target/test-data/decrypt.txt.html");
+        Files.createDirectories(input.getParent());
+        Files.writeString(input, testee.fillTemplate("decrypt", CIPHER_TEXT), UTF_8, CREATE);
+
+        // Act
+        testee.decrypt(List.of(input));
+
+        // Assert
+        assertEquals(PLAIN_TEXT, Files.readString(Path.of("target/test-data/decrypt.txt"), UTF_8));
+    }
+
+    @Test
     void encryptString_valid_success() throws GeneralSecurityException {
         // Act
-        String cipherText = testee.encryptString(password, plainText);
-        
+        String cipherText = testee.encryptString(PASSWORD, PLAIN_TEXT);
+
         // Assert
         String[] cipherTextParts = cipherText.split(":");
         assertEquals(3, cipherTextParts.length);
         assertEquals(18, cipherTextParts[0].length() * 3 / 4);
         assertEquals(12, cipherTextParts[1].length() * 3 / 4);
         assertEquals(69, cipherTextParts[2].length() * 3 / 4);
+    }
+
+    @Test
+    void decryptString_valid_success() throws GeneralSecurityException {
+        // Act
+        String plainText = testee.decryptString(PASSWORD, CIPHER_TEXT);
+
+        // Assert
+        assertEquals(PLAIN_TEXT, plainText);
     }
 
     @Test

@@ -16,9 +16,9 @@ $ file target/secret-page
 $ ldd  target/secret-page
 
 $ export SECRET_PAGE_PASSWORD=1234
-$ echo "Hello, World!" > data/test.txt
+$ echo "Hello, World!" > data/test.md
 $ target/secret-page prepare data/
-$ target/secret-page encrypt data/test.txt --allow-overwrite
+$ target/secret-page encrypt data/test.md --allow-overwrite
 ~~~
 
 ### Known Issues:
@@ -36,4 +36,7 @@ $ docker run -d --rm --name mysecretpage \
   nginxinc/nginx-unprivileged:alpine
 ~~~
 
-URL: http://localhost:8080/test.html
+Links:
+
+- [test.md.html](./data/test.md.html)
+- http://localhost:8080/test.md.html

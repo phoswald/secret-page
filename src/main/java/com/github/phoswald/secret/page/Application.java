@@ -32,6 +32,7 @@ public class Application {
     private static final Logger logger = LoggerFactory.getLogger(Application.class);
     private final SecureRandom sr = new SecureRandom();
     private final Base64.Encoder encoder = Base64.getEncoder();
+    private final Base64.Decoder decoder = Base64.getDecoder();
 
     private String password = null;
     private boolean allowOverwrite = false;
@@ -55,15 +56,19 @@ public class Application {
         } else if(args.size() >= 2 && Objects.equals(args.get(0), "encrypt")) {
             encrypt(args.subList(1, args.size()).stream().map(s -> Path.of(s).toAbsolutePath()).toList());
 
+        } else if(args.size() >= 2 && Objects.equals(args.get(0), "decrypt")) {
+            decrypt(args.subList(1, args.size()).stream().map(s -> Path.of(s).toAbsolutePath()).toList());
+
         } else {
             System.out.println("""
                 Syntax: 
                   secret-page [OPTIONS] prepare PATH
                   secret-page [OPTIONS] encrypt MD-FILE...
+                  secret-page [OPTIONS] decrypt HTML-FILE...
                 Options:
                   --allow-overwrite       dont fail if target file aready exists
                 Environment:
-                  SECRET_PAGE_PASSWORD    password for encryption, if undefined: prompted from console
+                  SECRET_PAGE_PASSWORD    password for encryption/decryption, if undefined: prompted from console
                 """);
         }
     }
@@ -112,6 +117,33 @@ public class Application {
         }
     }
 
+    void decrypt(List<Path> inputFiles) throws IOException, GeneralSecurityException {
+        String password = readPassword();
+        for(Path inputFile : inputFiles) {
+            String fileName = inputFile.getFileName().toString();
+            if(!fileName.endsWith(".html")) {
+                throw new IOException("Not an .html file: " + inputFile);
+            }
+            Path outputFile = inputFile.getParent().resolve(fileName.replaceAll("\\.html$", ""));
+            logger.info("Reading: {}", inputFile);
+            String inputHtml = Files.readString(inputFile, UTF_8);
+            String cipherText = extractCipherText(inputHtml);
+            String plainText = decryptString(password, cipherText);
+            logger.info("Writing: {} (size: {})", outputFile, plainText.length());
+            Files.writeString(outputFile, plainText, UTF_8, allowOverwrite ? CREATE : CREATE_NEW, TRUNCATE_EXISTING);
+        }
+    }
+
+    String extractCipherText(String html) throws IOException {
+        String startTag = "<div id=\"cipherText\" class=\"hidden\">";
+        int start = html.indexOf(startTag);
+        int end = start < 0 ? -1 : html.indexOf("</div>", start);
+        if(start < 0 || end < 0) {
+            throw new IOException("Cipher text not found");
+        }
+        return html.substring(start + startTag.length(), end).strip();
+    }
+
     private String readPassword() {
         if(password != null && !password.isEmpty()) {
             return password;
@@ -137,6 +169,18 @@ public class Application {
         return cipherTextParts;
     }
 
+    String decryptString(String password, String cipherText) throws GeneralSecurityException {
+        String[] cipherTextParts = cipherText.strip().split(":");
+        if(cipherTextParts.length != 3) {
+            throw new GeneralSecurityException("Invalid cipher text format");
+        }
+        byte[] salt = decoder.decode(cipherTextParts[0]);
+        byte[] iv = decoder.decode(cipherTextParts[1]);
+        SecretKey key = createKey(salt, password.toCharArray());
+        byte[] plainText = decryptMessage(key, iv, decoder.decode(cipherTextParts[2]));
+        return new String(plainText, UTF_8);
+    }
+
     private SecretKey createKey(byte[] salt, char[] password) throws GeneralSecurityException {
         SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
         KeySpec keySpec = new PBEKeySpec(password, salt, 600000 /* iterationCount */, 256 /* keyLength */);
@@ -150,6 +194,13 @@ public class Application {
         cipher.init(Cipher.ENCRYPT_MODE, key, new GCMParameterSpec(128 /* auth tag length */, iv));
         byte[] cipherText = cipher.doFinal(plainText);
         return cipherText;
+    }
+
+    private byte[] decryptMessage(SecretKey key, byte[] iv, byte[] cipherText) throws GeneralSecurityException {
+        Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+        cipher.init(Cipher.DECRYPT_MODE, key, new GCMParameterSpec(128 /* auth tag length */, iv));
+        byte[] plainText = cipher.doFinal(cipherText);
+        return plainText;
     }
 
     private byte[] fillRandom(byte[] buffer) {
